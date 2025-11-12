@@ -7,6 +7,11 @@ on:
         branches: [main]
     workflow_dispatch:
 
+# Ensure only one workflow runs at a time and cancel old ones
+concurrency:
+    group: ci-cd-pipeline
+    cancel-in-progress: true
+
 env:
     NODE_VERSION: "lts/*"
 
@@ -18,6 +23,12 @@ jobs:
         steps:
             - name: 📋 Checkout repository
               uses: actions/checkout@v4
+
+            - name: 🧹 Clean workspace
+              run: |
+                  echo "🧹 Cleaning workspace for fresh start..."
+                  rm -rf dist/ node_modules/.cache/ || true
+                  echo "✅ Workspace cleaned!"
 
             - name: 🔧 Setup Node.js
               uses: actions/setup-node@v4
