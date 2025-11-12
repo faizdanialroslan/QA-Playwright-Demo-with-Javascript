@@ -1,0 +1,119 @@
+{
+    "$schema": "https://schemas.modelcontextprotocol.io/v1/mcp-config.schema.json",
+    "name": "qa-playwright-portfolio",
+    "version": "1.0.0",
+    "description": "QA Playwright Test Automation Portfolio with MCP Server Integration",
+    "mcpVersion": "1.0",
+    "server": {
+        "host": "localhost",
+        "port": 3001,
+        "protocol": "http"
+    },
+    "execution": {
+        "parallel": true,
+        "workers": 4,
+        "sharding": {
+            "enabled": true,
+            "totalShards": 4,
+            "currentShard": 1
+        },
+        "retries": 2,
+        "timeout": 30000
+    },
+    "browsers": [
+        {
+            "name": "chromium",
+            "enabled": true,
+            "headless": true
+        },
+        {
+            "name": "webkit",
+            "enabled": true,
+            "headless": true
+        },
+        {
+            "name": "firefox",
+            "enabled": false,
+            "headless": true
+        }
+    ],
+    "testSuites": [
+        {
+            "name": "basic-ui",
+            "path": "./tests/01-basic-ui-tests.spec.ts",
+            "tags": [
+                "ui",
+                "todo",
+                "basic"
+            ],
+            "priority": 1
+        },
+        {
+            "name": "authentication",
+            "path": "./tests/02-authentication-flows.spec.ts",
+            "tags": [
+                "auth",
+                "login",
+                "security"
+            ],
+            "priority": 2
+        },
+        {
+            "name": "email-verification",
+            "path": "./tests/03-email-verification.spec.ts",
+            "tags": [
+                "email",
+                "verification",
+                "mailinator"
+            ],
+            "priority": 3
+        },
+        {
+            "name": "api-testing",
+            "path": "./tests/04-api-testing.spec.ts",
+            "tags": [
+                "api",
+                "integration",
+                "performance"
+            ],
+            "priority": 4
+        }
+    ],
+    "reports": {
+        "enabled": true,
+        "formats": [
+            "html",
+            "json",
+            "junit"
+        ],
+        "outputDir": "./test-results",
+        "artifacts": {
+            "screenshots": true,
+            "videos": true,
+            "traces": true
+        }
+    },
+    "environment": {
+        "baseUrl": "http://localhost:3000",
+        "headless": true,
+        "slowMo": 0,
+        "timeout": 30000
+    },
+    "capabilities": {
+        "screenshot": "only-on-failure",
+        "video": "retain-on-failure",
+        "trace": "on-first-retry"
+    },
+    "monitoring": {
+        "enabled": true,
+        "metrics": [
+            "performance",
+            "network",
+            "console"
+        ],
+        "alerts": {
+            "failureThreshold": 10,
+            "performanceThreshold": 5000
+        }
+    }
+}
