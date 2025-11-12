@@ -1,0 +1,48 @@
+name: ⚡️ Lightning Fast Deploy
+
+on:
+    push:
+        branches: [main]
+
+permissions:
+    contents: write
+    pages: write
+    id-token: write
+
+env:
+    NODE_VERSION: "lts/*"
+
+jobs:
+    lightning-deploy:
+        name: ⚡️ Lightning Deploy
+        runs-on: ubuntu-latest
+        steps:
+            - name: 📋 Checkout
+              uses: actions/checkout@v4
+
+            - name: 🔧 Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ env.NODE_VERSION }}
+                  cache: "npm"
+
+            - name: 📦 Install & Build
+              run: |
+                  npm ci
+                  npm run build
+
+            - name: 🚀 Deploy to GitHub Pages
+              uses: peaceiris/actions-gh-pages@v3
+              with:
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
+                  publish_dir: ./dist
+                  force_orphan: true
+                  enable_jekyll: false
+                  user_name: "github-actions[bot]"
+                  user_email: "github-actions[bot]@users.noreply.github.com"
+                  commit_message: "⚡️ Lightning Deploy v${{ github.run_number }}"
+
+            - name: ✅ Done
+              run: |
+                  echo "⚡️ Lightning deployment completed!"
+                  echo "🌐 Live: https://faizdanialroslan.github.io/QA-Playwright-Demo-with-Javascript"
