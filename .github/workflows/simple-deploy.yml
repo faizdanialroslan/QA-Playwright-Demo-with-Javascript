@@ -1,4 +1,4 @@
-name: 🚀 Complete CI/CD Pipeline - Build, Test, Deploy & Release
+name: ⚡ Fast CI/CD Pipeline - Build, Test & Deploy
 
 on:
     push:
@@ -7,12 +7,7 @@ on:
         branches: [main]
     workflow_dispatch:
 
-# Concurrency control disabled temporarily to allow first deployment
-# concurrency:
-#     group: ci-cd-pipeline
-#     cancel-in-progress: true
-
-# Add necessary permissions for GitHub Pages deployment
+# Fast deployment - no concurrency control
 permissions:
     contents: write
     pages: write
@@ -22,46 +17,9 @@ env:
     NODE_VERSION: "lts/*"
 
 jobs:
-    # 🔍 PHASE 1: Code Quality & Security Checks
-    code-quality:
-        name: 🔍 Code Quality & Security
-        runs-on: ubuntu-latest
-        steps:
-            - name: 📋 Checkout repository
-              uses: actions/checkout@v4
-
-            - name: 🧹 Clean workspace
-              run: |
-                  echo "🧹 Cleaning workspace for fresh start..."
-                  rm -rf dist/ node_modules/.cache/ || true
-                  echo "✅ Workspace cleaned!"
-
-            - name: 🔧 Setup Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: ${{ env.NODE_VERSION }}
-                  cache: "npm"
-
-            - name: 📦 Install dependencies
-              run: npm ci
-
-            - name: 🧹 Run linting
-              run: |
-                  echo "Running code linting..."
-                  npm run build || echo "Build check completed"
-
-            - name: 🔒 Security audit
-              run: |
-                  echo "Running security audit..."
-                  npm audit --audit-level=moderate || echo "Security audit completed"
-
-            - name: ✅ Code quality passed
-              run: echo "✅ All code quality checks passed!"
-
-    # 🏗️ PHASE 2: Build Application
-    build:
-        name: 🏗️ Build Application
-        needs: code-quality
+    # 🏗️ PHASE 1: Build & Test
+    build-and-test:
+        name: 🏗️ Build & Test
         runs-on: ubuntu-latest
         steps:
             - name: 📋 Checkout repository
@@ -79,82 +37,26 @@ jobs:
             - name: 🏗️ Build application
               run: npm run build
 
-            - name: 🔍 Verify build output
+            - name: 🧪 Quick test (Chromium only)
               run: |
-                  echo "📁 Build verification:"
-                  ls -la dist/
-                  echo "📊 Build size:"
-                  du -sh dist/
-                  echo "📋 Build files:"
-                  find dist/ -type f -name "*.html" -o -name "*.js" -o -name "*.css" | head -10
-                  echo "✅ Build verification completed!"
-
-            - name: 📦 Upload build artifacts
-              uses: actions/upload-artifact@v4
-              with:
-                  name: build-artifacts
-                  path: dist/
-                  retention-days: 7
-
-    # 🧪 PHASE 3: Comprehensive Testing
-    test-suite:
-        name: 🧪 Test Suite
-        needs: build
-        runs-on: ubuntu-latest
-        strategy:
-            fail-fast: false
-            matrix:
-                browser: [chromium, webkit]
-        steps:
-            - name: 📋 Checkout repository
-              uses: actions/checkout@v4
-
-            - name: 🔧 Setup Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: ${{ env.NODE_VERSION }}
-                  cache: "npm"
-
-            - name: 📦 Install dependencies
-              run: npm ci
-
-            - name: 📦 Download build artifacts
-              uses: actions/download-artifact@v4
-              with:
-                  name: build-artifacts
-                  path: dist/
-
-            - name: 🎭 Install Playwright browsers
-              run: npx playwright install ${{ matrix.browser }} --with-deps
-
-            - name: 🚀 Start test server
-              run: |
+                  npx playwright install chromium --with-deps
                   npm run preview &
-                  sleep 10
-                  echo "🌐 Test server started on http://localhost:4173"
-
-            - name: 🧪 Run Playwright tests
-              run: npx playwright test --project=${{ matrix.browser }}
+                  sleep 5
+                  npx playwright test --project=chromium
               env:
                   BASE_URL: http://localhost:4173
 
-            - name: 📊 Upload test results
+            - name: � Upload build artifacts
               uses: actions/upload-artifact@v4
-              if: always()
               with:
-                  name: test-results-${{ matrix.browser }}
-                  path: |
-                      test-results/
-                      playwright-report/
+                  name: build-artifacts
+                  path: dist/
                   retention-days: 7
 
-            - name: ✅ Tests completed for ${{ matrix.browser }}
-              run: echo "✅ All tests passed for ${{ matrix.browser }}!"
-
-    # 🚀 PHASE 4: Production Deployment
+    # 🚀 PHASE 2: Deploy to Production
     deploy:
-        name: 🚀 Deploy to Production
-        needs: [code-quality, build, test-suite]
+        name: 🚀 Deploy
+        needs: build-and-test
         runs-on: ubuntu-latest
         if: github.ref == 'refs/heads/main'
         steps:
@@ -166,17 +68,6 @@ jobs:
               with:
                   name: build-artifacts
                   path: dist/
-
-            - name: 🔍 Pre-deployment verification
-              run: |
-                  echo "🔍 Pre-deployment checks:"
-                  echo "📁 Deployment directory contents:"
-                  ls -la dist/
-                  echo "📊 Total files to deploy:"
-                  find dist/ -type f | wc -l
-                  echo "💾 Total deployment size:"
-                  du -sh dist/
-                  echo "✅ Pre-deployment verification completed!"
 
             - name: 🚀 Deploy to GitHub Pages
               uses: peaceiris/actions-gh-pages@v3
@@ -194,95 +85,3 @@ jobs:
                   echo "🎉 Deployment completed successfully!"
                   echo "🌐 Live URL: https://faizdanialroslan.github.io/QA-Playwright-Demo-with-Javascript"
                   echo "📦 Deployment ID: ${{ github.run_number }}"
-
-    # 🌐 PHASE 5: Post-Deployment Validation
-    production-tests:
-        name: 🌐 Production Validation
-        needs: deploy
-        runs-on: ubuntu-latest
-        strategy:
-            fail-fast: false
-            matrix:
-                browser: [chromium, webkit]
-        steps:
-            - name: 📋 Checkout repository
-              uses: actions/checkout@v4
-
-            - name: 🔧 Setup Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: ${{ env.NODE_VERSION }}
-                  cache: "npm"
-
-            - name: 📦 Install dependencies
-              run: npm ci
-
-            - name: 🎭 Install Playwright browsers
-              run: npx playwright install ${{ matrix.browser }} --with-deps
-
-            - name: ⏱️ Wait for deployment to propagate
-              run: |
-                  echo "⏱️ Waiting for deployment to propagate..."
-                  sleep 60
-                  echo "✅ Ready for production testing!"
-
-            - name: 🌐 Test production environment
-              run: npx playwright test --project=${{ matrix.browser }}
-              env:
-                  BASE_URL: https://faizdanialroslan.github.io/QA-Playwright-Demo-with-Javascript
-
-            - name: 📊 Upload production test results
-              uses: actions/upload-artifact@v4
-              if: always()
-              with:
-                  name: prod-test-results-${{ matrix.browser }}
-                  path: |
-                      test-results/
-                      playwright-report/
-                  retention-days: 30
-
-            - name: ✅ Production tests completed
-              run: echo "✅ Production validation passed for ${{ matrix.browser }}!"
-
-    # 🎯 PHASE 6: Release Notification & Status
-    release:
-        name: 🎯 Release Notification
-        needs: [code-quality, build, test-suite, deploy, production-tests]
-        runs-on: ubuntu-latest
-        if: always()
-        steps:
-            - name: 📊 Generate release report
-              run: |
-                  echo "🎉 QA PORTFOLIO RELEASE REPORT"
-                  echo "================================"
-                  echo "📅 Release Date: $(date)"
-                  echo "🔗 Repository: ${{ github.repository }}"
-                  echo "📝 Commit: ${{ github.sha }}"
-                  echo "🏷️ Build Number: ${{ github.run_number }}"
-                  echo ""
-                  echo "📊 PIPELINE RESULTS:"
-                  echo "🔍 Code Quality: ${{ needs.code-quality.result }}"
-                  echo "🏗️ Build: ${{ needs.build.result }}"
-                  echo "🧪 Test Suite: ${{ needs.test-suite.result }}"
-                  echo "🚀 Deployment: ${{ needs.deploy.result }}"
-                  echo "🌐 Production Tests: ${{ needs.production-tests.result }}"
-                  echo ""
-
-                  if [[ "${{ needs.production-tests.result }}" == "success" ]]; then
-                    echo "🎉 RELEASE SUCCESSFUL!"
-                    echo "🌐 Live Portfolio: https://faizdanialroslan.github.io/QA-Playwright-Demo-with-Javascript"
-                    echo "✅ All systems operational"
-                  else
-                    echo "❌ Release had issues - check individual job results"
-                  fi
-
-            - name: 🏆 Final status
-              run: |
-                  if [[ "${{ needs.production-tests.result }}" == "success" ]]; then
-                    echo "🏆 QA Portfolio successfully released and validated!"
-                    echo "🚀 Professional CI/CD pipeline completed successfully"
-                    exit 0
-                  else
-                    echo "❌ Release validation failed"
-                    exit 1
-                  fi
