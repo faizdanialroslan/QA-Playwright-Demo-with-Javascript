@@ -157,11 +157,6 @@ jobs:
         needs: [code-quality, build, test-suite]
         runs-on: ubuntu-latest
         if: github.ref == 'refs/heads/main'
-        outputs:
-            page_url: ${{ steps.deployment.outputs.page_url }}
-        environment:
-            name: github-pages
-            url: ${{ steps.deployment.outputs.page_url }}
         steps:
             - name: 📋 Checkout repository
               uses: actions/checkout@v4
@@ -183,22 +178,21 @@ jobs:
                   du -sh dist/
                   echo "✅ Pre-deployment verification completed!"
 
-            - name: � Setup Pages
-              uses: actions/configure-pages@v4
-
-            - name: 📦 Upload Pages artifact
-              uses: actions/upload-pages-artifact@v3
-              with:
-                  path: dist/
-
             - name: 🚀 Deploy to GitHub Pages
-              id: deployment
-              uses: actions/deploy-pages@v4
+              uses: peaceiris/actions-gh-pages@v3
+              with:
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
+                  publish_dir: ./dist
+                  force_orphan: true
+                  enable_jekyll: false
+                  user_name: "github-actions[bot]"
+                  user_email: "github-actions[bot]@users.noreply.github.com"
+                  commit_message: "🚀 Deploy QA Portfolio v${{ github.run_number }}"
 
             - name: ✅ Deployment completed
               run: |
                   echo "🎉 Deployment completed successfully!"
-                  echo "🌐 Live URL: ${{ steps.deployment.outputs.page_url }}"
+                  echo "🌐 Live URL: https://faizdanialroslan.github.io/QA-Playwright-Demo-with-Javascript"
                   echo "📦 Deployment ID: ${{ github.run_number }}"
 
     # 🌐 PHASE 5: Post-Deployment Validation
