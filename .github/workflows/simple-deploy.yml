@@ -1,4 +1,4 @@
-name: ⚡ Fast CI/CD Pipeline - Build, Test & Deploy
+name: ⚡ Ultra-Fast CI/CD Pipeline - Build, Test & Deploy
 
 on:
     push:
