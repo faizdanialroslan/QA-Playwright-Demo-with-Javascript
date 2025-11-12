@@ -126,7 +126,10 @@ jobs:
               with:
                   github_token: ${{ secrets.GITHUB_TOKEN }}
                   publish_dir: ./dist
-                  # cname: your-custom-domain.com # Uncomment and add your custom domain if you have one
+                  force_orphan: true
+                  user_name: 'github-actions[bot]'
+                  user_email: 'github-actions[bot]@users.noreply.github.com'
+                  commit_message: 'Deploy QA Portfolio ${{ github.sha }}'
 
     # 🧪 PHASE 4: Production Environment Testing (Only after deployment)
     prod-environment-tests:
