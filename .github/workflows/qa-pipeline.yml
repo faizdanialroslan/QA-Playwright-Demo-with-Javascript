@@ -45,7 +45,7 @@ jobs:
               run: npm ci
 
             - name: 🎭 Install Playwright browsers
-              run: npx playwright install ${{ matrix.browser }}
+              run: npx playwright install ${{ matrix.browser }} --with-deps
 
             - name: 🏗️ Build application
               run: npm run build
@@ -154,7 +154,7 @@ jobs:
               run: npm ci
 
             - name: 🎭 Install Playwright browsers
-              run: npx playwright install ${{ matrix.browser }}
+              run: npx playwright install ${{ matrix.browser }} --with-deps
 
             - name: ⏱️ Wait for deployment
               run: sleep 60
