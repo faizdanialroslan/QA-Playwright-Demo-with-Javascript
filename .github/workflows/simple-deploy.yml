@@ -7,10 +7,10 @@ on:
         branches: [main]
     workflow_dispatch:
 
-# Ensure only one workflow runs at a time and cancel old ones
-concurrency:
-    group: ci-cd-pipeline
-    cancel-in-progress: true
+# Concurrency control disabled temporarily to allow first deployment
+# concurrency:
+#     group: ci-cd-pipeline
+#     cancel-in-progress: true
 
 # Add necessary permissions for GitHub Pages deployment
 permissions:
