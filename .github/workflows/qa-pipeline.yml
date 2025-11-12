@@ -1,223 +1,229 @@
 name: 🚀 Professional QA Pipeline - Dev to Prod
 
 on:
-  push:
-    branches: [main, master]
-  pull_request:
-    branches: [main, master]
-  workflow_dispatch:
-    inputs:
-      environment:
-        description: "Environment to deploy"
-        required: true
-        default: "dev-only"
-        type: choice
-        options:
-          - dev-only
-          - full-pipeline
+    push:
+        branches: [main, master]
+    pull_request:
+        branches: [main, master]
+    workflow_dispatch:
+        inputs:
+            environment:
+                description: "Environment to deploy"
+                required: true
+                default: "dev-only"
+                type: choice
+                options:
+                    - dev-only
+                    - full-pipeline
 
 env:
-  NODE_VERSION: "lts/*"
+    NODE_VERSION: "lts/*"
 
 jobs:
-  # 🛠️ PHASE 1: Development Environment Testing
-  dev-environment-tests:
-    name: 🛠️ Development Environment Validation
-    timeout-minutes: 30
-    runs-on: ubuntu-latest
-    
-    strategy:
-      fail-fast: false
-      matrix:
-        browser: [chromium, firefox, webkit]
-    
-    steps:
-      - name: 📋 Checkout repository
-        uses: actions/checkout@v4
+    # 🛠️ PHASE 1: Development Environment Testing
+    dev-environment-tests:
+        name: 🛠️ Development Environment Validation
+        timeout-minutes: 30
+        runs-on: ubuntu-latest
 
-      - name: 🔧 Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: "npm"
+        strategy:
+            fail-fast: false
+            matrix:
+                browser: [chromium, firefox, webkit]
 
-      - name: 📦 Install dependencies
-        run: npm ci
+        steps:
+            - name: 📋 Checkout repository
+              uses: actions/checkout@v4
 
-      - name: 🎭 Install Playwright browsers
-        run: npx playwright install ${{ matrix.browser }}
+            - name: 🔧 Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ env.NODE_VERSION }}
+                  cache: "npm"
 
-      - name: 🏗️ Build application
-        run: npm run build
+            - name: 📦 Install dependencies
+              run: npm ci
 
-      - name: 🚀 Start development server
-        run: |
-          npm run preview &
-          sleep 10
-        
-      - name: 🧪 Run development tests (${{ matrix.browser }})
-        run: npx playwright test --project=${{ matrix.browser }} --config=playwright.config.ts
-        env:
-          BASE_URL: http://localhost:4173
+            - name: 🎭 Install Playwright browsers
+              run: npx playwright install ${{ matrix.browser }}
 
-      - name: 📊 Upload test results (Dev)
-        uses: actions/upload-artifact@v4
+            - name: 🏗️ Build application
+              run: npm run build
+
+            - name: 🚀 Start development server
+              run: |
+                  npm run preview &
+                  sleep 10
+
+            - name: 🧪 Run development tests (${{ matrix.browser }})
+              run: npx playwright test --project=${{ matrix.browser }} --config=playwright.config.ts
+              env:
+                  BASE_URL: http://localhost:4173
+
+            - name: 📊 Upload test results (Dev)
+              uses: actions/upload-artifact@v4
+              if: always()
+              with:
+                  name: dev-test-results-${{ matrix.browser }}
+                  path: |
+                      test-results/
+                      playwright-report/
+                  retention-days: 7
+
+    # ✅ PHASE 2: Development Environment Status Check
+    dev-environment-status:
+        name: ✅ Development Environment - Status Gate
+        needs: dev-environment-tests
+        runs-on: ubuntu-latest
         if: always()
-        with:
-          name: dev-test-results-${{ matrix.browser }}
-          path: |
-            test-results/
-            playwright-report/
-          retention-days: 7
 
-  # ✅ PHASE 2: Development Environment Status Check
-  dev-environment-status:
-    name: ✅ Development Environment - Status Gate
-    needs: dev-environment-tests
-    runs-on: ubuntu-latest
-    if: always()
-    
-    outputs:
-      dev-tests-passed: ${{ steps.check-dev.outputs.passed }}
-    
-    steps:
-      - name: 🔍 Check development test results
-        id: check-dev
-        run: |
-          if [[ "${{ needs.dev-environment-tests.result }}" == "success" ]]; then
-            echo "✅ Development tests PASSED - Ready for production"
-            echo "passed=true" >> $GITHUB_OUTPUT
-            exit 0
-          else
-            echo "❌ Development tests FAILED - Blocking production deployment"
-            echo "passed=false" >> $GITHUB_OUTPUT
-            exit 1
-          fi
+        outputs:
+            dev-tests-passed: ${{ steps.check-dev.outputs.passed }}
 
-  # 🚀 PHASE 3: Production Deployment (Only if Dev Tests Pass)
-  production-deployment:
-    name: 🚀 Production Deployment
-    needs: [dev-environment-tests, dev-environment-status]
-    runs-on: ubuntu-latest
-    if: |
-      always() && 
-      needs.dev-environment-status.outputs.dev-tests-passed == 'true' &&
-      (github.event.inputs.environment == 'full-pipeline' || github.event.inputs.environment == '')
-    
-    steps:
-      - name: 📋 Checkout repository
-        uses: actions/checkout@v4
+        steps:
+            - name: 🔍 Check development test results
+              id: check-dev
+              run: |
+                  if [[ "${{ needs.dev-environment-tests.result }}" == "success" ]]; then
+                    echo "✅ Development tests PASSED - Ready for production"
+                    echo "passed=true" >> $GITHUB_OUTPUT
+                    exit 0
+                  else
+                    echo "❌ Development tests FAILED - Blocking production deployment"
+                    echo "passed=false" >> $GITHUB_OUTPUT
+                    exit 1
+                  fi
 
-      - name: 🔧 Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: "npm"
+    # 🚀 PHASE 3: Production Deployment (Only if Dev Tests Pass)
+    production-deployment:
+        name: 🚀 Production Deployment
+        needs: [dev-environment-tests, dev-environment-status]
+        runs-on: ubuntu-latest
+        if: |
+            always() && 
+            needs.dev-environment-status.outputs.dev-tests-passed == 'true' &&
+            (github.event.inputs.environment == 'full-pipeline' || github.event.inputs.environment == '')
 
-      - name: 📦 Install dependencies
-        run: npm ci
+        steps:
+            - name: 📋 Checkout repository
+              uses: actions/checkout@v4
 
-      - name: 🏗️ Build for production
-        run: npm run build
+            - name: 🔧 Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ env.NODE_VERSION }}
+                  cache: "npm"
 
-      - name: 📤 Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        if: github.ref == 'refs/heads/main'
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
-          # cname: your-custom-domain.com # Uncomment and add your custom domain if you have one
+            - name: 📦 Install dependencies
+              run: npm ci
 
-  # 🧪 PHASE 4: Production Environment Testing (Only after deployment)
-  prod-environment-tests:
-    name: 🧪 Production Environment Validation
-    needs: [production-deployment]
-    runs-on: ubuntu-latest
-    if: always() && needs.production-deployment.result == 'success'
-    
-    strategy:
-      fail-fast: false
-      matrix:
-        browser: [chromium, firefox]
-    
-    steps:
-      - name: 📋 Checkout repository
-        uses: actions/checkout@v4
+            - name: 🏗️ Build for production
+              run: npm run build
 
-      - name: 🔧 Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: "npm"
+            - name: 📤 Deploy to GitHub Pages
+              uses: peaceiris/actions-gh-pages@v3
+              if: github.ref == 'refs/heads/main'
+              with:
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
+                  publish_dir: ./dist
+                  # cname: your-custom-domain.com # Uncomment and add your custom domain if you have one
 
-      - name: 📦 Install dependencies
-        run: npm ci
+    # 🧪 PHASE 4: Production Environment Testing (Only after deployment)
+    prod-environment-tests:
+        name: 🧪 Production Environment Validation
+        needs: [production-deployment]
+        runs-on: ubuntu-latest
+        if: always() && needs.production-deployment.result == 'success'
 
-      - name: 🎭 Install Playwright browsers
-        run: npx playwright install ${{ matrix.browser }}
+        strategy:
+            fail-fast: false
+            matrix:
+                browser: [chromium, firefox]
 
-      - name: ⏱️ Wait for deployment
-        run: sleep 60
+        steps:
+            - name: 📋 Checkout repository
+              uses: actions/checkout@v4
 
-      - name: 🌐 Test production environment (${{ matrix.browser }})
-        run: npx playwright test --project=${{ matrix.browser }} --config=playwright.config.prod.ts
-        env:
-          BASE_URL: https://faizdanialroslan.github.io/QA-Playwright-Demo-with-Javascript
+            - name: 🔧 Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ env.NODE_VERSION }}
+                  cache: "npm"
 
-      - name: 📊 Upload production test results
-        uses: actions/upload-artifact@v4
+            - name: 📦 Install dependencies
+              run: npm ci
+
+            - name: 🎭 Install Playwright browsers
+              run: npx playwright install ${{ matrix.browser }}
+
+            - name: ⏱️ Wait for deployment
+              run: sleep 60
+
+            - name: 🌐 Test production environment (${{ matrix.browser }})
+              run: npx playwright test --project=${{ matrix.browser }} --config=playwright.config.prod.ts
+              env:
+                  BASE_URL: https://faizdanialroslan.github.io/QA-Playwright-Demo-with-Javascript
+
+            - name: 📊 Upload production test results
+              uses: actions/upload-artifact@v4
+              if: always()
+              with:
+                  name: prod-test-results-${{ matrix.browser }}
+                  path: |
+                      test-results/
+                      playwright-report/
+                  retention-days: 30
+
+    # 📊 PHASE 5: Final Pipeline Status
+    pipeline-status:
+        name: 📊 Pipeline Status Report
+        needs:
+            [
+                dev-environment-tests,
+                dev-environment-status,
+                production-deployment,
+                prod-environment-tests,
+            ]
+        runs-on: ubuntu-latest
         if: always()
-        with:
-          name: prod-test-results-${{ matrix.browser }}
-          path: |
-            test-results/
-            playwright-report/
-          retention-days: 30
 
-  # 📊 PHASE 5: Final Pipeline Status
-  pipeline-status:
-    name: 📊 Pipeline Status Report
-    needs: [dev-environment-tests, dev-environment-status, production-deployment, prod-environment-tests]
-    runs-on: ubuntu-latest
-    if: always()
-    
-    steps:
-      - name: 📋 Generate pipeline report
-        run: |
-          echo "🚀 QA PIPELINE EXECUTION REPORT"
-          echo "================================"
-          echo "📅 Date: $(date)"
-          echo "🔗 Repository: ${{ github.repository }}"
-          echo "📝 Commit: ${{ github.sha }}"
-          echo ""
-          echo "📊 PHASE RESULTS:"
-          echo "🛠️  Dev Tests: ${{ needs.dev-environment-tests.result }}"
-          echo "✅ Dev Gate: ${{ needs.dev-environment-status.result }}"
-          echo "🚀 Prod Deploy: ${{ needs.production-deployment.result }}"
-          echo "🧪 Prod Tests: ${{ needs.prod-environment-tests.result }}"
-          echo ""
-          
-          if [[ "${{ needs.dev-environment-tests.result }}" == "success" ]]; then
-            echo "✅ Development environment validation: PASSED"
-          else
-            echo "❌ Development environment validation: FAILED"
-          fi
-          
-          if [[ "${{ needs.prod-environment-tests.result }}" == "success" ]]; then
-            echo "✅ Production environment validation: PASSED"
-            echo "🌐 Live URL: https://faizdanialroslan.github.io/QA-Playwright-Demo-with-Javascript"
-          elif [[ "${{ needs.prod-environment-tests.result }}" == "skipped" ]]; then
-            echo "⏭️  Production testing: SKIPPED (dev tests failed)"
-          else
-            echo "❌ Production environment validation: FAILED"
-          fi
+        steps:
+            - name: 📋 Generate pipeline report
+              run: |
+                  echo "🚀 QA PIPELINE EXECUTION REPORT"
+                  echo "================================"
+                  echo "📅 Date: $(date)"
+                  echo "🔗 Repository: ${{ github.repository }}"
+                  echo "📝 Commit: ${{ github.sha }}"
+                  echo ""
+                  echo "📊 PHASE RESULTS:"
+                  echo "🛠️  Dev Tests: ${{ needs.dev-environment-tests.result }}"
+                  echo "✅ Dev Gate: ${{ needs.dev-environment-status.result }}"
+                  echo "🚀 Prod Deploy: ${{ needs.production-deployment.result }}"
+                  echo "🧪 Prod Tests: ${{ needs.prod-environment-tests.result }}"
+                  echo ""
 
-      - name: 🔔 Set pipeline status
-        run: |
-          if [[ "${{ needs.prod-environment-tests.result }}" == "success" || ("${{ needs.dev-environment-tests.result }}" == "success" && "${{ github.event.inputs.environment }}" == "dev-only") ]]; then
-            echo "✅ QA Pipeline completed successfully!"
-            exit 0
-          else
-            echo "❌ QA Pipeline failed - check logs for details"
-            exit 1
-          fi
+                  if [[ "${{ needs.dev-environment-tests.result }}" == "success" ]]; then
+                    echo "✅ Development environment validation: PASSED"
+                  else
+                    echo "❌ Development environment validation: FAILED"
+                  fi
+
+                  if [[ "${{ needs.prod-environment-tests.result }}" == "success" ]]; then
+                    echo "✅ Production environment validation: PASSED"
+                    echo "🌐 Live URL: https://faizdanialroslan.github.io/QA-Playwright-Demo-with-Javascript"
+                  elif [[ "${{ needs.prod-environment-tests.result }}" == "skipped" ]]; then
+                    echo "⏭️  Production testing: SKIPPED (dev tests failed)"
+                  else
+                    echo "❌ Production environment validation: FAILED"
+                  fi
+
+            - name: 🔔 Set pipeline status
+              run: |
+                  if [[ "${{ needs.prod-environment-tests.result }}" == "success" || ("${{ needs.dev-environment-tests.result }}" == "success" && "${{ github.event.inputs.environment }}" == "dev-only") ]]; then
+                    echo "✅ QA Pipeline completed successfully!"
+                    exit 0
+                  else
+                    echo "❌ QA Pipeline failed - check logs for details"
+                    exit 1
+                  fi
