@@ -10,7 +10,8 @@ export class BasePage {
     }
 
     async goto() {
-        await this.page.goto(this.url);
+        await this.page.goto(this.url, { waitUntil: 'load' });
+        await this.page.waitForLoadState('domcontentloaded');
     }
 
     async waitForLoadState() {

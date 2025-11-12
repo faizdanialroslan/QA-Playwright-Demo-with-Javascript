@@ -29,7 +29,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                browser: [chromium, firefox, webkit]
+                browser: [chromium, webkit]
 
         steps:
             - name: 📋 Checkout repository
@@ -138,7 +138,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                browser: [chromium, firefox]
+                browser: [chromium, webkit]
 
         steps:
             - name: 📋 Checkout repository

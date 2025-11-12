@@ -21,7 +21,10 @@
         "qa:pipeline": "./scripts/qa-pipeline-dev-first.sh",
         "deploy:dev-first": "./scripts/qa-pipeline-dev-first.sh",
         "deploy:check": "./scripts/qa-workflow.sh",
-        "version:update": "./scripts/update-version.sh"
+        "version:update": "./scripts/update-version.sh",
+        "push:dev": "./scripts/push-dev.sh",
+        "push:prod": "./scripts/push-prod.sh",
+        "version:generate": "./scripts/generate-version.sh"
     },
     "dependencies": {
         "axios": "^1.6.0",
