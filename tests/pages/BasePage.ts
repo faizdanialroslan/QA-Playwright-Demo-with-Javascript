@@ -10,8 +10,16 @@ export class BasePage {
     }
 
     async goto() {
-        await this.page.goto(this.url, { waitUntil: 'load' });
-        await this.page.waitForLoadState('domcontentloaded');
+        try {
+            await this.page.goto(this.url, { waitUntil: 'domcontentloaded', timeout: 10000 });
+        } catch (error) {
+            // Handle navigation interruption gracefully
+            if (error.message.includes('interrupted')) {
+                await this.page.waitForLoadState('domcontentloaded');
+            } else {
+                throw error;
+            }
+        }
     }
 
     async waitForLoadState() {

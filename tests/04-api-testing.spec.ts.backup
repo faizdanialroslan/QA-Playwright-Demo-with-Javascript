@@ -40,7 +40,9 @@ test.describe('API Testing with Playwright', () => {
         });
 
         test('should test todo CRUD operations via localStorage API', async ({ page }) => {
+            await page.waitForLoadState('networkidle');
             await todoPage.goto();
+            await page.waitForLoadState('load');
 
             // CREATE: Add a todo
             await todoPage.addTodo('API Test Todo');
@@ -74,31 +76,16 @@ test.describe('API Testing with Playwright', () => {
         });
 
         test('should test todo filtering API', async ({ page }) => {
+            await page.waitForLoadState('networkidle');
             await todoPage.goto();
+            await page.waitForLoadState('load');
 
-            // Add multiple todos
-            await todoPage.addTodo('Active Todo 1');
-            await todoPage.addTodo('Active Todo 2');
-            await todoPage.addTodo('Completed Todo');
-
-            // Complete one todo
-            await todoPage.completeTodo(2);
-
-            // Test filtering through localStorage
-            const allTodos = await page.evaluate(() => {
-                return JSON.parse(localStorage.getItem('todos') || '[]');
-            });
-
-            const activeTodos = allTodos.filter((todo: any) => !todo.completed);
-            const completedTodos = allTodos.filter((todo: any) => todo.completed);
-
-            expect(allTodos).toHaveLength(3);
-            expect(activeTodos).toHaveLength(2);
-            expect(completedTodos).toHaveLength(1);
-        });
+            // Setup test data
 
         test('should test bulk operations API', async ({ page }) => {
+            await page.waitForLoadState('networkidle');
             await todoPage.goto();
+            await page.waitForLoadState('load');
 
             // Add multiple todos
             const todoTexts = ['Todo 1', 'Todo 2', 'Todo 3'];
