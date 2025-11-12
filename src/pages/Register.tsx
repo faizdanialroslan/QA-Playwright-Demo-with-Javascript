@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import { Version } from '../components/Version'
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -56,8 +57,9 @@ export default function Register() {
   }
 
   return (
-    <div className="auth-container">
-      <h2>Register</h2>
+    <div style={{ textAlign: 'center', padding: '2rem', minHeight: '100vh' }}>
+      <div className="auth-container">
+        <h2>Register</h2>
       
       <form onSubmit={handleSubmit} data-testid="register-form">
         <div className="form-group">
@@ -153,11 +155,14 @@ export default function Register() {
           Already have an account? <Link to="/login">Login here</Link>
         </p>
         
-        <div style={{ marginTop: '1rem', padding: '1rem', backgroundColor: '#fff3cd', borderRadius: '4px' }}>
+        <div style={{ marginTop: '1rem', padding: '1rem', backgroundColor: '#DAA520', borderRadius: '4px', color: '#000' }}>
           <p><strong>Email Verification Demo:</strong></p>
           <p>Use the "Generate Test Email" button to create a Mailinator email for testing email verification flows.</p>
         </div>
       </div>
+      
+      <Version />
+    </div>
     </div>
   )
 }

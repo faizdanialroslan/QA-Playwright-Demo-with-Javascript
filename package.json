@@ -1,20 +1,27 @@
 {
     "name": "qa-playwright-portfolio",
     "private": true,
-    "version": "1.0.0",
+    "version": "20251112.2144",
+    "description": "Comprehensive QA test automation portfolio showcasing Playwright testing capabilities with React applications, including UI testing, authentication flows, email verification, API testing, and CI/CD integration",
     "type": "module",
     "scripts": {
         "dev": "vite",
+        "prebuild": "chmod +x scripts/update-version.sh && ./scripts/update-version.sh",
         "build": "tsc && vite build",
         "preview": "vite preview",
         "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
         "test": "playwright test",
+        "test:dev": "playwright test --config=playwright.config.ts",
+        "test:prod": "playwright test --config=playwright.config.prod.ts",
+        "test:prod-local": "npm run build && npm run preview & sleep 3 && playwright test --config=playwright.config.prod.ts --base-url=http://localhost:4173",
         "test:ui": "playwright test --ui",
         "test:headed": "playwright test --headed",
         "test:debug": "playwright test --debug",
         "test:report": "playwright show-report",
-        "mcp:start": "mcp start",
-        "mcp:test": "mcp test"
+        "qa:pipeline": "./scripts/qa-pipeline-dev-first.sh",
+        "deploy:dev-first": "./scripts/qa-pipeline-dev-first.sh",
+        "deploy:check": "./scripts/qa-workflow.sh",
+        "version:update": "./scripts/update-version.sh"
     },
     "dependencies": {
         "axios": "^1.6.0",

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import { Version } from '../components/Version'
 
 export default function VerifyEmail() {
   const [searchParams] = useSearchParams()
@@ -95,6 +96,8 @@ export default function VerifyEmail() {
           Example: <code>/verify-email?token=valid-token</code>
         </p>
       </div>
+      
+      <Version />
     </div>
   )
 }

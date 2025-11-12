@@ -221,8 +221,10 @@ test.describe('Todo Application - Basic UI Tests', () => {
         // Complete one todo
         await todoPage.completeTodo(0);
 
-        // Reload page
+        // Reload page and wait for todos to load
         await page.reload();
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForTimeout(500); // Give React time to load from localStorage
 
         // Verify todos persisted
         const todoCount = await todoPage.getTodoItems();

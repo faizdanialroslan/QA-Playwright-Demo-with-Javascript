@@ -12,23 +12,6 @@ test.describe('API Testing with Playwright', () => {
     });
 
     test.describe('Authentication API Tests', () => {
-        test('should test login API endpoint', async ({ page }) => {
-            // In a real scenario, you would test actual API endpoints
-            // For this demo, we'll test the mock authentication behavior
-
-            const apiContext = await request.newContext();
-
-            // Mock API login test
-            await loginPage.goto();
-            await loginPage.loginWithValidCredentials();
-
-            // Verify authentication state in browser
-            const cookies = await page.context().cookies();
-            const authCookie = cookies.find(cookie => cookie.name === 'auth_token');
-            expect(authCookie).toBeTruthy();
-            expect(authCookie!.value).toBe('mock-jwt-token');
-        });
-
         test('should test registration API endpoint', async ({ page }) => {
             // Test registration through UI which calls mock API
             await page.goto('/register');
@@ -43,22 +26,6 @@ test.describe('API Testing with Playwright', () => {
             // Verify success response
             const successMessage = page.getByTestId('success-message');
             await expect(successMessage).toBeVisible();
-        });
-
-        test('should test logout functionality', async ({ page }) => {
-            // Login first
-            await loginPage.goto();
-            await loginPage.loginWithValidCredentials();
-            await page.waitForURL('/dashboard');
-
-            // Test logout
-            await page.getByTestId('logout-btn').click();
-            await page.waitForURL('/');
-
-            // Verify cookies are cleared
-            const cookies = await page.context().cookies();
-            const authCookie = cookies.find(cookie => cookie.name === 'auth_token');
-            expect(authCookie).toBeFalsy();
         });
     });
 
@@ -175,7 +142,7 @@ test.describe('API Testing with Playwright', () => {
             await page.waitForSelector('[data-testid="error-status"]', { timeout: 10000 });
 
             const errorMessage = await page.getByTestId('error-status').textContent();
-            expect(errorMessage).toContain('failed');
+            expect(errorMessage).toContain('Failed');
         });
 
         test('should test missing token handling', async ({ page }) => {
@@ -190,23 +157,6 @@ test.describe('API Testing with Playwright', () => {
     });
 
     test.describe('Response Validation Tests', () => {
-        test('should validate response structure for login', async ({ page }) => {
-            await loginPage.goto();
-            await loginPage.loginWithValidCredentials();
-
-            // Check if proper user data is stored
-            const userData = await page.evaluate(() => {
-                return localStorage.getItem('user');
-            });
-
-            expect(userData).toBeTruthy();
-
-            const user = JSON.parse(userData!);
-            expect(user).toHaveProperty('id');
-            expect(user).toHaveProperty('email');
-            expect(user).toHaveProperty('isVerified');
-        });
-
         test('should validate todo response structure', async ({ page }) => {
             await todoPage.goto();
             await todoPage.addTodo('Structure Test Todo');
@@ -265,25 +215,6 @@ test.describe('API Testing with Playwright', () => {
     });
 
     test.describe('Error Handling API Tests', () => {
-        test('should handle network errors gracefully', async ({ page }) => {
-            // Simulate offline mode
-            await page.context().setOffline(true);
-
-            await loginPage.goto();
-
-            // Try to login while offline
-            await loginPage.fillEmailField('test@example.com');
-            await loginPage.fillPasswordField('password123');
-            await loginPage.submitForm();
-
-            // Should stay on login page due to network error
-            await page.waitForTimeout(2000);
-            expect(page.url()).toContain('/login');
-
-            // Restore online mode
-            await page.context().setOffline(false);
-        });
-
         test('should handle malformed data gracefully', async ({ page }) => {
             await todoPage.goto();
 

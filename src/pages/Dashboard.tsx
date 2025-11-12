@@ -1,12 +1,19 @@
-import { Navigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import { Version } from '../components/Version'
 
 export default function Dashboard() {
-  const { user } = useAuth()
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
 
   // Redirect to login if not authenticated
   if (!user) {
     return <Navigate to="/login" replace />
+  }
+
+  const handleLogout = async () => {
+    logout()
+    navigate('/')
   }
 
   return (
@@ -14,6 +21,21 @@ export default function Dashboard() {
       <div className="dashboard-header">
         <h1>Dashboard</h1>
         <p>Welcome back, {user.name || user.email}!</p>
+        <button 
+          onClick={handleLogout}
+          data-testid="logout-btn"
+          style={{ 
+            marginTop: '1rem', 
+            padding: '0.5rem 1rem', 
+            backgroundColor: '#e74c3c', 
+            color: 'white', 
+            border: 'none', 
+            borderRadius: '4px',
+            cursor: 'pointer'
+          }}
+        >
+          Logout
+        </button>
       </div>
       
       <div className="dashboard-cards">
@@ -80,6 +102,8 @@ export default function Dashboard() {
           </ul>
         </div>
       </div>
+      
+      <Version />
     </div>
   )
 }

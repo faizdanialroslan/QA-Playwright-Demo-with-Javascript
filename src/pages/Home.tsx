@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { Version } from '../components/Version'
 
 export default function Home() {
   return (
@@ -33,34 +34,57 @@ export default function Home() {
             <button>Try Registration</button>
           </Link>
         </div>
-        
-        <div className="card">
-          <h3>⚡ MCP Server Integration</h3>
-          <p>Distributed test execution with Playwright MCP server for scalable testing.</p>
-          <p><em>View test results in CI/CD pipeline</em></p>
+      </div>
+      
+      <div style={{ margin: '3rem 0', textAlign: 'center' }}>
+        <h2>Portfolio Features</h2>
+        <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+          <div style={{ margin: '0.5rem 0', textAlign: 'left', display: 'flex', alignItems: 'center' }}>
+            <span style={{ minWidth: '30px', textAlign: 'center' }}>✅</span>
+            <span>Basic UI Tests (Todo CRUD operations)</span>
+          </div>
+          <div style={{ margin: '0.5rem 0', textAlign: 'left', display: 'flex', alignItems: 'center' }}>
+            <span style={{ minWidth: '30px', textAlign: 'center' }}>✅</span>
+            <span>Authentication Flows (Login/Register/Logout)</span>
+          </div>
+          <div style={{ margin: '0.5rem 0', textAlign: 'left', display: 'flex', alignItems: 'center' }}>
+            <span style={{ minWidth: '30px', textAlign: 'center' }}>✅</span>
+            <span>Email Verification with Mailinator API</span>
+          </div>
+          <div style={{ margin: '0.5rem 0', textAlign: 'left', display: 'flex', alignItems: 'center' }}>
+            <span style={{ minWidth: '30px', textAlign: 'center' }}>✅</span>
+            <span>Page Object Model Design Pattern</span>
+          </div>
+          <div style={{ margin: '0.5rem 0', textAlign: 'left', display: 'flex', alignItems: 'center' }}>
+            <span style={{ minWidth: '30px', textAlign: 'center' }}>✅</span>
+            <span>Cross-browser Testing (Chromium + WebKit)</span>
+          </div>
+          <div style={{ margin: '0.5rem 0', textAlign: 'left', display: 'flex', alignItems: 'center' }}>
+            <span style={{ minWidth: '30px', textAlign: 'center' }}>✅</span>
+            <span>Test Sharding and Parallel Execution</span>
+          </div>
+          <div style={{ margin: '0.5rem 0', textAlign: 'left', display: 'flex', alignItems: 'center' }}>
+            <span style={{ minWidth: '30px', textAlign: 'center' }}>✅</span>
+            <span>CI/CD Integration with GitHub Actions</span>
+          </div>
+          <div style={{ margin: '0.5rem 0', textAlign: 'left', display: 'flex', alignItems: 'center' }}>
+            <span style={{ minWidth: '30px', textAlign: 'center' }}>✅</span>
+            <span>Test Artifacts (Reports, Traces, Videos)</span>
+          </div>
+          <div style={{ margin: '0.5rem 0', textAlign: 'left', display: 'flex', alignItems: 'center' }}>
+            <span style={{ minWidth: '30px', textAlign: 'center' }}>✅</span>
+            <span>Secure Secrets Management</span>
+          </div>
         </div>
       </div>
       
-      <div style={{ margin: '3rem 0' }}>
-        <h2>Portfolio Features</h2>
-        <ul style={{ textAlign: 'left', maxWidth: '600px', margin: '0 auto' }}>
-          <li>✅ Basic UI Tests (Todo CRUD operations)</li>
-          <li>✅ Authentication Flows (Login/Register/Logout)</li>
-          <li>✅ Email Verification with Mailinator API</li>
-          <li>✅ Page Object Model Design Pattern</li>
-          <li>✅ Cross-browser Testing (Chromium + WebKit)</li>
-          <li>✅ Test Sharding and Parallel Execution</li>
-          <li>✅ CI/CD Integration with GitHub Actions</li>
-          <li>✅ Test Artifacts (Reports, Traces, Videos)</li>
-          <li>✅ Secure Secrets Management</li>
-        </ul>
+      <div style={{ marginTop: '2rem', padding: '2rem', backgroundColor: '#DAA520', borderRadius: '12px', textAlign: 'center', boxShadow: '0 4px 8px rgba(0,0,0,0.1)', maxWidth: '800px', margin: '2rem auto' }}>
+        <p style={{ margin: '0.8rem 0', fontSize: '1.1rem', lineHeight: '1.6' }}><strong>Tech Stack:</strong> React + TypeScript + Vite + Playwright</p>
+        <p style={{ margin: '0.8rem 0', fontSize: '1.1rem', lineHeight: '1.6' }}><strong>Testing:</strong> E2E Testing, API Testing, Visual Regression, Performance</p>
+        <p style={{ margin: '0.8rem 0', fontSize: '1.1rem', lineHeight: '1.6' }}><strong>CI/CD:</strong> GitHub Actions, Docker, Test Reporting, Artifact Management</p>
       </div>
       
-      <div style={{ marginTop: '2rem', padding: '1rem', backgroundColor: '#f0f0f0', borderRadius: '8px' }}>
-        <p><strong>Tech Stack:</strong> React + TypeScript + Vite + Playwright + MCP</p>
-        <p><strong>Testing:</strong> E2E Testing, API Testing, Visual Regression, Performance</p>
-        <p><strong>CI/CD:</strong> GitHub Actions, Docker, Test Reporting, Artifact Management</p>
-      </div>
+      <Version />
     </div>
   )
 }

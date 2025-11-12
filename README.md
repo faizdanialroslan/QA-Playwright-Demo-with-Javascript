@@ -1,6 +1,6 @@
 # QA Playwright Test Automation Portfolio
 
-A comprehensive test automation portfolio demonstrating advanced Playwright testing capabilities with React applications, including UI testing, authentication flows, email verification, API testing, and CI/CD integration with MCP server support.
+A comprehensive test automation portfolio demonstrating advanced Playwright testing capabilities with React applications, including UI testing, authentication flows, email verification, API testing, and CI/CD integration.
 
 ## 🚀 Portfolio Features
 
@@ -16,9 +16,9 @@ A comprehensive test automation portfolio demonstrating advanced Playwright test
 
 ### Advanced Features
 - 🔧 **Page Object Model** - Maintainable and scalable test architecture
-- 🔄 **MCP Server Integration** - Distributed test execution
 - 🌐 **CI/CD Pipeline** - GitHub Actions with artifact management
 - 📊 **Test Reporting** - HTML, JSON, and JUnit reports
+- 🏷️ **Advanced Versioning** - YYYYMMDD_deploymentCount_HHMM format for deployment tracking
 - 🎥 **Test Artifacts** - Screenshots, videos, and traces
 - 🔐 **Secure Secrets Management** - Environment variables and CI/CD secrets
 - ⚡ **Parallel Execution** - Test sharding across multiple workers
@@ -46,7 +46,6 @@ qa-playwright-portfolio/
 │   └── 04-api-testing.spec.ts          # API testing suite
 ├── .github/workflows/            # CI/CD pipeline
 │   └── playwright.yml            # GitHub Actions workflow
-├── mcp-config.json               # MCP server configuration
 ├── playwright.config.ts          # Playwright configuration
 ├── package.json                  # Project dependencies
 └── README.md                     # This documentation
@@ -76,7 +75,6 @@ qa-playwright-portfolio/
 - **GitHub Actions** - Automated testing pipeline
 - **Docker Support** - Containerized testing environment
 - **Artifact Management** - Test results and reports storage
-- **MCP Server** - Distributed test execution
 
 ## 🚀 Getting Started
 
@@ -161,18 +159,6 @@ npm run test:debug
 #### Generate test report
 ```bash
 npm run test:report
-```
-
-### Using MCP Server
-
-#### Start MCP server
-```bash
-npm run mcp:start
-```
-
-#### Run tests with MCP
-```bash
-npm run mcp:test
 ```
 
 ## 📧 Email Verification Testing with Mailinator
@@ -343,51 +329,6 @@ export class LoginPage extends BasePage {
 - **Readability** - Tests read like natural language
 - **Debugging** - Easier to debug issues with clear separation
 - **Scalability** - Easy to add new pages and functionality
-
-## ⚙️ MCP Server Integration
-
-Model Context Protocol (MCP) server integration enables distributed test execution:
-
-### Configuration (`mcp-config.json`)
-```json
-{
-  "execution": {
-    "parallel": true,
-    "workers": 4,
-    "sharding": {
-      "enabled": true,
-      "totalShards": 4
-    }
-  },
-  "browsers": ["chromium", "webkit", "firefox"],
-  "testSuites": [
-    {
-      "name": "basic-ui",
-      "path": "./tests/01-basic-ui-tests.spec.ts",
-      "priority": 1
-    }
-  ]
-}
-```
-
-### Benefits
-- **Parallel Execution** - Run tests across multiple workers
-- **Cross-browser Testing** - Simultaneous browser execution
-- **Test Sharding** - Distribute tests for faster execution
-- **Resource Optimization** - Efficient resource utilization
-- **Scalability** - Easy to scale test execution
-
-### MCP Commands
-```bash
-# Start MCP server
-npm run mcp:start
-
-# Run distributed tests
-npm run mcp:test
-
-# Monitor test execution
-npm run mcp:monitor
-```
 
 ## 🔧 CI/CD Pipeline
 
@@ -603,7 +544,6 @@ Contributions are welcome! Please follow these guidelines:
 - [x] Cross-browser testing
 - [x] API testing with Playwright
 - [x] Email verification with Mailinator
-- [x] MCP server integration
 - [x] CI/CD pipeline with GitHub Actions
 - [x] Test artifacts and reporting
 - [x] Security testing

@@ -8,7 +8,7 @@ This is a comprehensive test automation portfolio demonstrating advanced Playwri
 - **Frontend**: React 18 + TypeScript + Vite
 - **Testing**: Playwright with Page Object Model architecture
 - **Integration**: Email verification with Mailinator API
-- **CI/CD**: GitHub Actions with MCP server integration
+- **CI/CD**: GitHub Actions integration
 - **Authentication**: JWT-based authentication with session management
 
 ## Code Patterns and Conventions
@@ -167,12 +167,6 @@ export const TodoItem: React.FC<TodoItemProps> = ({ todo, onToggle, onDelete }) 
 - Email parsing and link extraction
 - Token-based verification flow
 - Error handling for invalid tokens
-
-### MCP Server Integration
-- Distributed test execution
-- Cross-browser test sharding
-- Performance monitoring
-- Artifact collection and reporting
 
 When working on this project, prioritize:
 1. Comprehensive test coverage

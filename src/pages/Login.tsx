@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Navigate, Link } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import { Version } from '../components/Version'
 
 export default function Login() {
   const [formData, setFormData] = useState({
@@ -34,8 +35,9 @@ export default function Login() {
   }
 
   return (
-    <div className="auth-container">
-      <h2>Login</h2>
+    <div style={{ textAlign: 'center', padding: '2rem', minHeight: '100vh' }}>
+      <div className="auth-container">
+        <h2>Login</h2>
       
       <form onSubmit={handleSubmit} data-testid="login-form">
         <div className="form-group">
@@ -87,12 +89,15 @@ export default function Login() {
           Don't have an account? <Link to="/register">Register here</Link>
         </p>
         
-        <div style={{ marginTop: '1rem', padding: '1rem', backgroundColor: '#e8f4f8', borderRadius: '4px' }}>
+        <div style={{ marginTop: '1rem', padding: '1rem', backgroundColor: '#DAA520', borderRadius: '4px', color: '#000' }}>
           <p><strong>Demo Credentials:</strong></p>
           <p>Email: test@example.com</p>
           <p>Password: password123</p>
         </div>
       </div>
+      </div>
+      
+      <Version />
     </div>
   )
 }

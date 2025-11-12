@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Version } from '../components/Version'
 
 interface Todo {
   id: string
@@ -11,6 +12,7 @@ export default function TodoApp() {
   const [todos, setTodos] = useState<Todo[]>([])
   const [inputText, setInputText] = useState('')
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all')
+  const [isLoaded, setIsLoaded] = useState(false)
 
   // Load todos from localStorage on mount
   useEffect(() => {
@@ -26,12 +28,15 @@ export default function TodoApp() {
         console.error('Error loading todos:', error)
       }
     }
+    setIsLoaded(true)
   }, [])
 
-  // Save todos to localStorage whenever todos change
+  // Save todos to localStorage whenever todos change (but only after initial load)
   useEffect(() => {
-    localStorage.setItem('todos', JSON.stringify(todos))
-  }, [todos])
+    if (isLoaded) {
+      localStorage.setItem('todos', JSON.stringify(todos))
+    }
+  }, [todos, isLoaded])
 
   const addTodo = (e: React.FormEvent) => {
     e.preventDefault()
@@ -44,7 +49,7 @@ export default function TodoApp() {
         createdAt: new Date()
       }
       
-      setTodos(prev => [newTodo, ...prev])
+      setTodos(prev => [...prev, newTodo])
       setInputText('')
     }
   }
@@ -77,7 +82,7 @@ export default function TodoApp() {
   const completedCount = todos.filter(todo => todo.completed).length
 
   return (
-    <div className="todo-app">
+    <div style={{ textAlign: 'center', padding: '2rem', minHeight: '100vh' }}>
       <h1>Todo Application</h1>
       <p>Comprehensive UI testing with Playwright</p>
       
@@ -181,19 +186,21 @@ export default function TodoApp() {
         </ul>
       )}
 
-      <div style={{ marginTop: '2rem', padding: '1rem', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
-        <h3>Test Scenarios Covered:</h3>
-        <ul style={{ textAlign: 'left', margin: '0.5rem 0' }}>
-          <li>✅ Add new todo items</li>
-          <li>✅ Mark todos as complete/incomplete</li>
-          <li>✅ Delete individual todos</li>
-          <li>✅ Filter todos (All/Active/Completed)</li>
-          <li>✅ Clear all completed todos</li>
-          <li>✅ Persistent storage (localStorage)</li>
-          <li>✅ Empty state handling</li>
-          <li>✅ Form validation</li>
-        </ul>
+      <div style={{ marginTop: '2rem', padding: '1rem', backgroundColor: '#DAA520', borderRadius: '4px', color: '#000' }}>
+        <h3>Scenarios Covered:</h3>
+        <div style={{ textAlign: 'left', display: 'inline-block' }}>
+          <p>✅ Add new todo items</p>
+          <p>✅ Mark todos as complete/incomplete</p>
+          <p>✅ Delete individual todos</p>
+          <p>✅ Filter todos (All/Active/Completed)</p>
+          <p>✅ Clear all completed todos</p>
+          <p>✅ Persistent storage (localStorage)</p>
+          <p>✅ Empty state handling</p>
+          <p>✅ Form validation</p>
+        </div>
       </div>
+      
+      <Version showDetails={true} />
     </div>
   )
 }

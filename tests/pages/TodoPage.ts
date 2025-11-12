@@ -26,7 +26,7 @@ export class TodoPage extends BasePage {
         this.filterActiveButton = page.getByTestId('filter-active');
         this.filterCompletedButton = page.getByTestId('filter-completed');
         this.clearCompletedButton = page.getByTestId('clear-completed-btn');
-        this.testScenariosSection = page.locator('text=Test Scenarios Covered');
+        this.testScenariosSection = page.locator('text=Scenarios Covered:');
     }
 
     async addTodo(todoText: string) {
@@ -63,7 +63,7 @@ export class TodoPage extends BasePage {
 
     async isTodoCompleted(index: number) {
         const todoItem = this.todoItems.nth(index);
-        return await todoItem.locator('.completed').count() > 0;
+        return await todoItem.getAttribute('class').then(cls => cls?.includes('completed') || false);
     }
 
     async filterTodos(filter: 'all' | 'active' | 'completed') {

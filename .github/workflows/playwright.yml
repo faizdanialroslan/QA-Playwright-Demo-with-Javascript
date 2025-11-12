@@ -1,4 +1,4 @@
-name: QA Playwright Test Automation Portfolio
+name: 🚀 Professional QA Pipeline - Dev to Prod
 on:
   push:
     branches: [main, master]
@@ -9,6 +9,14 @@ on:
     - cron: "0 2 * * *"
   workflow_dispatch:
     inputs:
+      environment:
+        description: "Environment to deploy"
+        required: true
+        default: "dev-only"
+        type: choice
+        options:
+          - dev-only
+          - full-pipeline
       browser:
         description: "Browser to test"
         required: true
@@ -19,15 +27,6 @@ on:
           - chromium
           - firefox
           - webkit
-      test_suite:
-        description: "Test suite to run"
-        required: true
-        default: "all"
-        type: choice
-        options:
-          - all
-          - basic-ui
-          - authentication
           - email-verification
           - api-testing
 
@@ -62,6 +61,26 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Update build version with deployment count
+        run: |
+          # Generate version with deployment count based on current UTC time
+          DATE=$(date -u +"%Y%m%d")
+          TIME=$(date -u +"%H%M")
+
+          # Get deployment count for today (simulate with run number)
+          DEPLOY_COUNT=$(printf "%02d" ${{ github.run_number }})
+
+          BUILD_VERSION="${DATE}_${DEPLOY_COUNT}_${TIME}"
+          echo "Setting build version to: $BUILD_VERSION"
+
+          # Update package.json with new versioning format
+          sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"$BUILD_VERSION\"/" package.json
+
+          echo "BUILD_VERSION=$BUILD_VERSION" >> $GITHUB_ENV
+          echo "DEPLOY_DATE=$DATE" >> $GITHUB_ENV
+          echo "DEPLOY_COUNT=$DEPLOY_COUNT" >> $GITHUB_ENV
+          echo "DEPLOY_TIME=$TIME" >> $GITHUB_ENV
+
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
 
@@ -77,8 +96,15 @@ jobs:
           sleep 10
           curl --retry 10 --retry-delay 5 --retry-connrefused http://localhost:3000 || exit 1
 
-      - name: Run Playwright tests
-        run: npx playwright test --project=${{ matrix.browser }} --shard=${{ matrix.shard }}/4
+      - name: Run Playwright tests with deployment info
+        run: |
+          echo "🚀 Running QA Test Suite for Deployment $BUILD_VERSION"
+          echo "📅 Date: $(date)"
+          echo "🌍 Environment: ${{ github.ref_name }}"
+          echo "💻 Browser: ${{ matrix.browser }}"
+          echo "🔢 Shard: ${{ matrix.shard }}/4"
+
+          npx playwright test --project=${{ matrix.browser }} --shard=${{ matrix.shard }}/4
         env:
           CI: true
           PLAYWRIGHT_HTML_REPORT: test-results/html/report-${{ matrix.browser }}-shard-${{ matrix.shard }}
@@ -125,73 +151,9 @@ jobs:
           path: test-results/traces/
           retention-days: 7
 
-  mcp-tests:
-    timeout-minutes: 30
-    runs-on: ubuntu-latest
-    needs: test
-    if: always()
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "lts/*"
-          cache: "npm"
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
-
-      - name: Start application server
-        run: |
-          npm run dev &
-          sleep 10
-
-      - name: Run MCP Server Tests
-        run: |
-          # Mock MCP server execution
-          echo "Starting MCP Server for distributed testing..."
-          echo "Running tests across multiple workers..."
-          npx playwright test --workers=4
-          echo "MCP Server tests completed successfully"
-
-      - name: Generate MCP Test Report
-        run: |
-          echo "Generating MCP performance report..."
-          mkdir -p mcp-reports
-          echo '{
-            "timestamp": "'$(date -Iseconds)'",
-            "workers": 4,
-            "total_tests": "'$(npx playwright test --list | grep -c "✓")'",
-            "execution_time": "120s",
-            "success_rate": "98.5%",
-            "browser_distribution": {
-              "chromium": "40%",
-              "webkit": "35%", 
-              "firefox": "25%"
-            },
-            "performance_metrics": {
-              "avg_test_duration": "2.3s",
-              "parallel_efficiency": "87%",
-              "resource_utilization": "optimal"
-            }
-          }' > mcp-reports/performance.json
-
-      - name: Upload MCP Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: mcp-performance-report
-          path: mcp-reports/
-          retention-days: 30
-
   deploy-reports:
     if: always()
-    needs: [test, mcp-tests]
+    needs: [test]
     runs-on: ubuntu-latest
 
     steps:
@@ -211,7 +173,6 @@ jobs:
           echo "- Browsers: Chromium, WebKit, Firefox" >> merged-reports/summary.md
           echo "- Test Shards: 4" >> merged-reports/summary.md
           echo "- Parallel Execution: Yes" >> merged-reports/summary.md
-          echo "- MCP Server: Enabled" >> merged-reports/summary.md
           echo "" >> merged-reports/summary.md
           echo "## Test Suites" >> merged-reports/summary.md
           echo "1. **Basic UI Tests** - Todo application functionality" >> merged-reports/summary.md
@@ -236,20 +197,17 @@ jobs:
 
   slack-notification:
     if: always()
-    needs: [test, mcp-tests, deploy-reports]
+    needs: [test, deploy-reports]
     runs-on: ubuntu-latest
 
     steps:
       - name: Notify Slack
-        if: env.SLACK_WEBHOOK != ''
         uses: 8398a7/action-slack@v3
         with:
           status: ${{ job.status }}
           text: |
             QA Playwright Portfolio Test Results:
             - Browser Tests: ${{ needs.test.result }}
-            - MCP Server Tests: ${{ needs.mcp-tests.result }}
             - Report Deployment: ${{ needs.deploy-reports.result }}
-          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
