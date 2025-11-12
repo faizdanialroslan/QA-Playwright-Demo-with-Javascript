@@ -99,11 +99,14 @@ jobs:
         name: 🚀 Production Deployment
         needs: [dev-environment-tests, dev-environment-status]
         runs-on: ubuntu-latest
-        environment: github-pages
+        environment: 
+            name: github-pages
+            url: ${{ steps.deployment.outputs.page_url }}
         if: |
             always() && 
             needs.dev-environment-status.outputs.dev-tests-passed == 'true' &&
-            (github.event.inputs.environment == 'full-pipeline' || github.event.inputs.environment == '')
+            (github.event.inputs.environment == 'full-pipeline' || github.event.inputs.environment == '') &&
+            github.ref == 'refs/heads/main'
 
         permissions:
             contents: read
@@ -126,7 +129,13 @@ jobs:
             - name: 🏗️ Build for production
               run: npm run build
 
-            - name: � Setup Pages
+            - name: � Verify build output
+              run: |
+                  echo "Checking build output..."
+                  ls -la dist/
+                  echo "Build verification complete"
+
+            - name: �📋 Setup Pages
               uses: actions/configure-pages@v4
 
             - name: 📦 Upload artifact
