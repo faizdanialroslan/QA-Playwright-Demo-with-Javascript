@@ -19,11 +19,6 @@ on:
 env:
     NODE_VERSION: "lts/*"
 
-permissions:
-    contents: read
-    pages: write
-    id-token: write
-
 jobs:
     # 🛠️ PHASE 1: Development Environment Testing
     dev-environment-tests:
@@ -125,14 +120,13 @@ jobs:
             - name: 🏗️ Build for production
               run: npm run build
 
-            - name: Upload artifact for GitHub Pages
-              uses: actions/upload-pages-artifact@v2
-              with:
-                  path: ./dist
-
-            - name: Deploy to GitHub Pages
-              uses: actions/deploy-pages@v2
+            - name: 📤 Deploy to GitHub Pages
+              uses: peaceiris/actions-gh-pages@v3
               if: github.ref == 'refs/heads/main'
+              with:
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
+                  publish_dir: ./dist
+                  force_orphan: true
 
     # 🧪 PHASE 4: Production Environment Testing (Only after deployment)
     prod-environment-tests:
