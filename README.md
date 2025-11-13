@@ -102,10 +102,22 @@ npx playwright install
 ```
 
 4. **Set up environment variables**
+
+The project uses different environment configurations for development and production testing:
+
 ```bash
+# For development (already configured)
+# Uses .env.development with localhost:3000
+
+# For production testing (already configured)  
+# Uses .env.production with live site URL
+
+# Optional: Create custom .env for local overrides
 cp .env.example .env
 # Edit .env with your configuration
 ```
+
+📖 **See [ENVIRONMENT.md](./ENVIRONMENT.md) for detailed environment configuration guide**
 
 5. **Start the development server**
 ```bash
@@ -113,6 +125,18 @@ npm run dev
 ```
 
 ### Running Tests Locally
+
+#### Development Environment Tests (Default)
+```bash
+# Run tests against local development server (localhost:3000)
+npm run test:dev
+```
+
+#### Production Environment Tests
+```bash
+# Run tests against live production site
+npm run test:prod
+```
 
 #### Run all tests
 ```bash
