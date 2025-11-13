@@ -14,10 +14,12 @@ export default defineConfig({
     fullyParallel: true,
     /* Fail the build on CI if you accidentally left test.only in the source code. */
     forbidOnly: !!process.env.CI,
-    /* Retry on CI only */
-    retries: process.env.CI ? 2 : 1,
-    /* Opt out of parallel tests on CI - use sharding instead for better resource management */
-    workers: process.env.CI ? 2 : 1,
+    /* Retry on CI or use RETRIES from env */
+    retries: process.env.CI ? 2 : parseInt(process.env.RETRIES || '1'),
+    /* Use workers from environment or default to 1 */
+    workers: process.env.CI ? 2 : parseInt(process.env.WORKERS || '1'),
+    /* Global timeout for tests */
+    timeout: parseInt(process.env.TIMEOUT || '30000'),
     /* Reporter to use. See https://playwright.dev/docs/test-reporters */
     reporter: [
         ['html', { outputFolder: 'test-results/prod-html' }],
@@ -34,16 +36,22 @@ export default defineConfig({
         /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
         trace: 'on-first-retry',
 
-        /* Capture screenshot on failure */
-        screenshot: 'only-on-failure',
+        /* Capture screenshot based on environment variable */
+        screenshot: (process.env.SCREENSHOT_MODE as 'on' | 'off' | 'only-on-failure') || 'only-on-failure',
 
-        /* Capture video on failure */
-        video: 'retain-on-failure',
+        /* Capture video based on environment variable */
+        video: (process.env.VIDEO_MODE as 'on' | 'off' | 'retain-on-failure' | 'on-first-retry') || 'retain-on-failure',
 
         /* Production-specific settings */
         ignoreHTTPSErrors: true,
         actionTimeout: 10000,
-        navigationTimeout: 30000
+        navigationTimeout: 30000,
+        
+        /* Slow down operations by specified milliseconds */
+        launchOptions: {
+            slowMo: parseInt(process.env.SLOW_MO || '0'),
+            headless: process.env.HEADLESS === 'true',
+        },
     },
 
     /* Configure projects for major browsers */
