@@ -6,13 +6,15 @@ import { test, expect } from '@playwright/test';
  */
 test.describe('Environment Configuration', () => {
     test('should load development environment variables correctly', async ({ page }) => {
-        // This test verifies the config is loading .env.development
+        // This test verifies the config is loading .env.development for local testing
         const baseURL = process.env.BASE_URL;
         const timeout = process.env.TIMEOUT;
         const workers = process.env.WORKERS;
         const retries = process.env.RETRIES;
+        const nodeEnv = process.env.NODE_ENV;
 
         console.log('Development Environment Variables:');
+        console.log('  NODE_ENV:', nodeEnv);
         console.log('  BASE_URL:', baseURL);
         console.log('  TIMEOUT:', timeout);
         console.log('  WORKERS:', workers);
@@ -27,6 +29,10 @@ test.describe('Environment Configuration', () => {
         expect(timeout).toBeDefined();
         expect(workers).toBeDefined();
         expect(retries).toBeDefined();
+
+        // Verify we're using development settings
+        expect(baseURL).toBe('http://localhost:3000');
+        expect(nodeEnv).toBe('development');
 
         // Navigate to home page to verify baseURL works
         await page.goto('/');

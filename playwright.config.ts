@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 import * as dotenv from 'dotenv';
 
-// Read environment variables from .env.development or .env file
+// Read environment variables from .env.development for local testing
 dotenv.config({ path: '.env.development' });
 dotenv.config(); // Fallback to .env if .env.development doesn't exist
 
